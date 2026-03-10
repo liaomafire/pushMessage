@@ -8,6 +8,7 @@ on:
 jobs:
   request-and-notify:
     runs-on: ubuntu-latest
+    environment: test  # 添加这行，指定环境名称
     steps:
       - name: Send Request
         id: request
@@ -39,6 +40,7 @@ jobs:
             url="https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send"
           fi
           
-          curl -X POST "$url" \
+          curl -v -X POST "$url" \
             -H "Content-type: application/x-www-form-urlencoded" \
-            --data "text=每日签到结果&desp=请求结果：\n${{ steps.request.outputs.response }}"
+            --data-urlencode "text=每日签到结果" \
+            --data-urlencode "desp=请求结果：${{ steps.request.outputs.response }}"
