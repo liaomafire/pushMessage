@@ -20,6 +20,9 @@ jobs:
             -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" \
             --data-urlencode "type=2" \
             --data-urlencode "input=1GB")
+              # 使用 python 将 Unicode 编码转为中文
+          RESPONSE=$(echo "$RESPONSE" | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=2))")
+          
           echo "response=$RESPONSE" >>$GITHUB_OUTPUT
       
       - name: Print Response
