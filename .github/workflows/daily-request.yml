@@ -21,11 +21,24 @@ jobs:
             --data-urlencode "input=1GB")
           echo "response=$RESPONSE" >>$GITHUB_OUTPUT
       
+      - name: Print Response
+        run: |
+          echo "===== 请求结果 ====="
+          echo "${{ steps.request.outputs.response }}"
+          echo "===================="
+      
       - name: Notify WeChat
         if: always()
         env:
           SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
         run: |
-          curl -X POST "https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send" \
-            -d "title=每日签到结果" \
-            -d "desp=请求结果：\n${{ steps.request.outputs.response }}"
+          if [[ "$SERVERCHAN_KEY" =~ ^sctp([0-9]+)t ]]; then
+            num=${BASH_REMATCH[1]}
+            url="https://${num}.push.ft07.com/send/${SERVERCHAN_KEY}.send"
+          else
+            url="https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send"
+          fi
+          
+          curl -X POST "$url" \
+            -H "Content-type: application/x-www-form-urlencoded" \
+            --data "text=每日签到结果&desp=请求结果：\n${{ steps.request.outputs.response }}"
