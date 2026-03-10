@@ -1,0 +1,31 @@
+name: Daily Request with WeChat Notify
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 北京时间下午5点
+  workflow_dispatch:
+
+jobs:
+  request-and-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Request
+        id: request
+        run: |
+          RESPONSE=$(curl -s -X POST "https://ezapi.z-dragon.cc/a3f9c2e8/7d4b91af/eFFwVkMwWUZEMnZjdy82MEpCZUNEQT09" \
+            -H "authorization: ${{ secrets.AUTHORIZATION }}" \
+            -H "x-iv: ${{ secrets.X_IV }}" \
+            -H "content-type: application/x-www-form-urlencoded" \
+            -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" \
+            --data-urlencode "type=2" \
+            --data-urlencode "input=1GB")
+          echo "response=$RESPONSE" >>$GITHUB_OUTPUT
+      
+      - name: Notify WeChat
+        if: always()
+        env:
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+        run: |
+          curl -X POST "https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send" \
+            -d "title=每日签到结果" \
+            -d "desp=请求结果：\n${{ steps.request.outputs.response }}"
