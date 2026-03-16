@@ -35,6 +35,7 @@ jobs:
         if: always()
         env:
           SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          RESPONSE: ${{ steps.request.outputs.response }}  # 先放到环境变量
         run: |
           if [[ "$SERVERCHAN_KEY" =~ ^sctp([0-9]+)t ]]; then
             num=${BASH_REMATCH[1]}
@@ -46,4 +47,5 @@ jobs:
           curl -v -X POST "$url" \
             -H "Content-type: application/x-www-form-urlencoded" \
             --data-urlencode "text=每日签到结果" \
-            --data-urlencode "desp=请求结果：${{ steps.request.outputs.response }}"
+            --data-urlencode "desp=$RESPONSE"  # 使用环境变量，并用引号包裹
+
